@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -7,31 +9,39 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-  Zap,
   Users,
   Trophy,
   Calendar,
   Play,
   Bell,
   ExternalLink,
+  Cpu,
+  Network,
+  Brain,
+  Sparkles,
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
   const router = useRouter()
 
   const slides = [
     {
       title: "University Hackathon Series",
-      subtitle: "Innovation Starts Here",
+      subtitle: "4th Industrial Revolution",
       description: "Where Innovation Meets Excellence",
       highlight: "Innovate. Compete. Elevate.",
       buttonText: "Start Your Journey",
       buttonLink: "/about",
-      image: "/images/uhs-team.jpeg",
+      image: "/images/scientific-lab.jpeg",
+      theme: "biotech",
     },
     {
       title: "7th Annual Hackathon",
@@ -40,7 +50,8 @@ export default function Home() {
       highlight: "R45,000 in Prizes",
       buttonText: "Register Now",
       buttonLink: "#register",
-      image: "/images/carousel1.jpeg",
+      image: "/images/ai-technology.jpeg",
+      theme: "ai",
     },
     {
       title: "Future Tech Leaders",
@@ -49,7 +60,8 @@ export default function Home() {
       highlight: "500+ Participants Expected",
       buttonText: "View Webinars",
       buttonLink: "/webinars",
-      image: "/images/carousel2.jpeg",
+      image: "/images/data-science.jpeg",
+      theme: "data",
     },
   ]
 
@@ -79,246 +91,380 @@ export default function Home() {
     },
   ]
 
+  // Stable carousel auto-advance
   useEffect(() => {
+    if (!isAutoPlaying) return
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [slides.length])
+    }, 10000)
 
+    return () => clearInterval(interval)
+  }, [slides.length, isAutoPlaying])
+
+  // Mouse position tracking
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+    window.addEventListener("mousemove", handleMouseMove)
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [])
+
+  // Fixed navigation functions
   const nextSlide = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setIsAutoPlaying(false)
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
+    setTimeout(() => {
+      setIsTransitioning(false)
+      setIsAutoPlaying(true)
+    }, 1000)
   }
 
   const prevSlide = () => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setIsAutoPlaying(false)
     setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
+    setTimeout(() => {
+      setIsTransitioning(false)
+      setIsAutoPlaying(true)
+    }, 1000)
+  }
+
+  const goToSlide = (index: number) => {
+    if (isTransitioning) return
+    setIsTransitioning(true)
+    setIsAutoPlaying(false)
+    setCurrentSlide(index)
+    setTimeout(() => {
+      setIsTransitioning(false)
+      setIsAutoPlaying(true)
+    }, 1000)
   }
 
   const handleRegisterClick = () => {
     setShowRegisterModal(true)
   }
 
-  // Check if today is a webinar day (for demo purposes, we'll simulate)
-  const isWebinarDay = false // This would be dynamic based on actual dates
+  const SophisticatedText = ({
+    text,
+    delay = 0,
+    className = "",
+  }: {
+    text: string
+    delay?: number
+    className?: string
+  }) => {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay }}
+        className={className}
+      >
+        {text.split(" ").map((word, wordIndex) => (
+          <span key={wordIndex} className="inline-block mr-2">
+            {word.split("").map((char, charIndex) => (
+              <motion.span
+                key={charIndex}
+                initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{
+                  duration: 0.4,
+                  delay: delay + wordIndex * 0.1 + charIndex * 0.02,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+                className="inline-block"
+              >
+                {char}
+              </motion.span>
+            ))}
+          </span>
+        ))}
+      </motion.div>
+    )
+  }
+
+  const FloatingParticles = () => {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              background: `linear-gradient(45deg, ${
+                i % 4 === 0 ? "#3B82F6" : i % 4 === 1 ? "#EF4444" : i % 4 === 2 ? "#F59E0B" : "#10B981"
+              }, ${i % 4 === 0 ? "#1E40AF" : i % 4 === 1 ? "#DC2626" : i % 4 === 2 ? "#D97706" : "#059669"})`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              x: [0, Math.random() * 50 - 25],
+              y: [0, Math.random() * 50 - 25],
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.6, 0.2],
+            }}
+            transition={{
+              duration: 6 + Math.random() * 4,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  const FloatingBubbles = () => {
+    return (
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-3 h-3 bg-gradient-to-r from-yellow-400 to-red-400 rounded-full opacity-20"
+            animate={{
+              x: [0, 50, 0],
+              y: [0, -50, 0],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 8 + i * 2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  const EnhancedButton = ({
+    children,
+    onClick,
+    variant = "primary",
+    size = "lg",
+    className = "",
+  }: {
+    children: React.ReactNode
+    onClick?: () => void
+    variant?: "primary" | "secondary"
+    size?: "sm" | "md" | "lg"
+    className?: string
+  }) => {
+    return (
+      <motion.button
+        onClick={onClick}
+        className={`
+          relative overflow-hidden group
+          ${variant === "primary" ? "bg-gradient-to-r from-blue-600 to-purple-600" : "border-2 border-white bg-transparent"}
+          ${size === "lg" ? "px-8 py-4 text-lg" : size === "md" ? "px-6 py-3 text-base" : "px-4 py-2 text-sm"}
+          text-white font-semibold rounded-xl transition-all duration-300
+          ${className}
+        `}
+        whileHover={{ scale: 1.02, y: -1 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          initial={{ x: "-100%" }}
+          whileHover={{ x: "0%" }}
+          transition={{ duration: 0.3 }}
+        />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+          initial={{ x: "-100%" }}
+          animate={{ x: "200%" }}
+          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatDelay: 4 }}
+        />
+        <span className="relative z-10 flex items-center justify-center gap-2">{children}</span>
+      </motion.button>
+    )
+  }
+
+  const isWebinarDay = false
 
   return (
-    <main className="bg-white">
+    <main className="bg-white relative overflow-hidden">
+      {/* Floating Particles Background */}
+      <FloatingParticles />
+      {/* Floating Bubbles */}
+      <FloatingBubbles />
+
+      {/* Subtle cursor effect */}
+      <motion.div
+        className="fixed w-4 h-4 bg-blue-500/10 rounded-full pointer-events-none z-50 mix-blend-multiply"
+        animate={{
+          x: mousePosition.x - 8,
+          y: mousePosition.y - 8,
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      />
+
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden">
-        {/* Slider */}
+        {/* Animated Grid Background */}
+        <div className="absolute inset-0 opacity-3">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px)
+              `,
+              backgroundSize: "60px 60px",
+            }}
+          />
+        </div>
+
+        {/* Throttled Slide Show */}
         <div className="relative h-screen">
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                currentSlide === index ? "opacity-100" : "opacity-0"
-              }`}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              className="absolute inset-0"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {/* Background Image with Overlay */}
-              <div className="absolute inset-0 bg-black/50 z-10"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/30 to-black/50 z-10"></div>
               <Image
-                src={slide.image || "/placeholder.svg?height=1080&width=1920"}
-                alt={slide.title}
+                src={slides[currentSlide].image || "/placeholder.svg?height=1080&width=1920"}
+                alt={slides[currentSlide].title}
                 fill
                 className="object-cover"
                 priority
               />
 
-              {/* Content */}
+              {/* Content Overlay */}
               <div className="absolute inset-0 z-20 flex items-center">
                 <div className="container mx-auto px-4">
                   <div className="max-w-4xl">
-                    {/* Badge */}
+                    {/* Subtitle Badge */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="inline-flex items-center px-6 py-3 rounded-full bg-blue-600 text-white font-semibold mb-8 shadow-lg"
+                      initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.8 }}
+                      className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600/80 to-purple-600/80 backdrop-blur-sm text-white font-semibold mb-8 shadow-lg border border-white/10"
                     >
-                      <Zap className="w-5 h-5 mr-2" />
-                      {slide.subtitle}
+                      <SophisticatedText text={slides[currentSlide].subtitle} delay={0.5} />
                     </motion.div>
 
                     {/* Main Title */}
-                    <motion.h1
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="text-4xl md:text-6xl lg:text-7xl font-space-grotesk font-bold mb-6 text-white"
-                    >
-                      {slide.title}
+                    <motion.h1 className="text-4xl md:text-6xl lg:text-7xl font-space-grotesk font-bold mb-6 text-white">
+                      <SophisticatedText text={slides[currentSlide].title} delay={0.8} />
                     </motion.h1>
 
                     {/* Description */}
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
+                      transition={{ delay: 1.8, duration: 0.8 }}
                       className="text-xl md:text-2xl text-white/90 mb-4 font-medium"
                     >
-                      {slide.description}
-                    </motion.p>
+                      <SophisticatedText text={slides[currentSlide].description} delay={1.8} />
+                    </motion.div>
 
                     {/* Highlight */}
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.8 }}
+                      transition={{ delay: 2.2, duration: 0.8 }}
                       className="text-lg md:text-xl text-yellow-400 font-semibold mb-12"
                     >
-                      {slide.highlight}
-                    </motion.p>
+                      <SophisticatedText text={slides[currentSlide].highlight} delay={2.2} />
+                    </motion.div>
 
                     {/* CTA Buttons */}
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 }}
+                      transition={{ delay: 2.8, duration: 0.8 }}
                       className="flex flex-col sm:flex-row gap-6"
                     >
-                      {slide.buttonLink === "#register" ? (
-                        <Button
-                          onClick={handleRegisterClick}
-                          size="lg"
-                          className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        >
-                          {slide.buttonText}
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => router.push(slide.buttonLink)}
-                          size="lg"
-                          className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        >
-                          {slide.buttonText}
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      )}
-                      <Button
-                        onClick={() => router.push("/gallery")}
-                        variant="outline"
-                        size="lg"
-                        className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 bg-transparent"
+                      <EnhancedButton
+                        onClick={
+                          slides[currentSlide].buttonLink === "#register"
+                            ? handleRegisterClick
+                            : () => router.push(slides[currentSlide].buttonLink)
+                        }
+                        variant="primary"
                       >
-                        <Play className="mr-2 h-5 w-5" />
+                        {slides[currentSlide].buttonText}
+                        <ArrowRight className="w-5 h-5" />
+                      </EnhancedButton>
+
+                      <EnhancedButton onClick={() => router.push("/gallery")} variant="secondary">
+                        <Play className="w-5 h-5" />
                         Watch Highlights
-                      </Button>
+                      </EnhancedButton>
                     </motion.div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            </motion.div>
+          </AnimatePresence>
 
           {/* Navigation Arrows */}
-          <button
+          <motion.button
             onClick={prevSlide}
-            className="fixed left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-4 rounded-full transition-all duration-300 transform hover:scale-110"
-            aria-label="Previous slide"
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-4 rounded-full transition-all duration-300 border border-white/20"
+            whileHover={{ scale: 1.05, x: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ChevronLeft className="h-8 w-8" />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             onClick={nextSlide}
-            className="fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-4 rounded-full transition-all duration-300 transform hover:scale-110"
-            aria-label="Next slide"
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-30 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-4 rounded-full transition-all duration-300 border border-white/20"
+            whileHover={{ scale: 1.05, x: 2 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ChevronRight className="h-8 w-8" />
-          </button>
+          </motion.button>
 
           {/* Dots */}
           <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center space-x-3">
             {slides.map((_, index) => (
-              <button
+              <motion.button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                  currentSlide === index ? "bg-red-600 w-12" : "bg-white/60 hover:bg-white"
+                onClick={() => goToSlide(index)}
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  currentSlide === index
+                    ? "bg-gradient-to-r from-blue-500 to-purple-500 w-8"
+                    : "bg-white/60 hover:bg-white/80 w-2"
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
-              ></button>
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              />
             ))}
           </div>
-        </div>
 
-        {/* Live Meeting Button - Floating */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.5 }}
-          className="fixed bottom-8 right-8 z-40"
-        >
-          <Button
-            asChild
-            className={`bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
-              isWebinarDay ? "animate-pulse" : ""
-            }`}
-          >
-            <a
-              href="https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZWNkYzQ1YjctMTMyMy00ZWJjLTk2ZTUtOTQ1MjE5NTU0ZGUz%40thread.v2/0?context=%7b%22Tid%22%3a%223df74539-9453-4d03-bb9d-b9102cb9ce9c%22%2c%22Oid%22%3a%221b6c3b43-fe35-4636-b64e-919b8fe5a8b9%22%7d"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center"
-            >
-              <span
-                className={`inline-block w-3 h-3 bg-red-500 rounded-full mr-2 ${isWebinarDay ? "animate-ping" : "animate-pulse"}`}
-              ></span>
-              Live • JOIN UHS MEETING
-            </a>
-          </Button>
-        </motion.div>
-      </section>
-
-      {/* UHS Hackathon Series Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-space-grotesk font-bold mb-4 text-gray-800">
-              UHS Hackathon Series
-            </h2>
-            <div className="h-1 w-24 bg-red-600 mx-auto mb-6"></div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              UHS is the parent organization for multiple hackathon events across South Africa
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {hackathons.map((hackathon, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="group"
-              >
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full text-center">
-                  <div className="text-4xl mb-6">🏆</div>
-                  <h3 className="text-xl font-space-grotesk font-bold mb-4 text-gray-800">{hackathon.name}</h3>
-                  <a
-                    href={hackathon.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    Visit Website <ExternalLink className="w-4 h-4 ml-1" />
-                  </a>
-                  <div className="h-1 w-16 bg-red-600 mt-6 mx-auto group-hover:w-24 transition-all duration-300"></div>
-                </div>
-              </motion.div>
-            ))}
+          {/* Progress Bar */}
+          <div className="absolute bottom-0 left-0 right-0 z-30 h-1 bg-white/20">
+            <motion.div
+              key={currentSlide}
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+              initial={{ width: "0%" }}
+              animate={{ width: isAutoPlaying ? "100%" : "0%" }}
+              transition={{ duration: 6, ease: "linear" }}
+            />
           </div>
         </div>
       </section>
 
+     she
       {/* Hall of Fame Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -342,21 +488,21 @@ export default function Home() {
                 initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 className="group"
               >
                 <div className="shadow-xl border-0 bg-gradient-to-r from-white via-blue-50/50 to-yellow-50/50 hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl p-8">
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-red-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-red-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                   <div className="relative z-10">
                     <div className="flex flex-col md:flex-row items-start gap-6">
                       <div className="flex-shrink-0">
                         <motion.div
                           animate={{
-                            rotate: [0, 5, -5, 0],
+                            rotate: [0, 2, -2, 0],
                           }}
                           transition={{
-                            duration: 3,
+                            duration: 4,
                             repeat: Number.POSITIVE_INFINITY,
                             ease: "easeInOut",
                           }}
@@ -412,7 +558,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-102 transition-transform duration-300">
                 <Image
                   src="/images/tvh2025.jpg"
                   alt="7th Annual Tshwane Varsity Hackathon 2025"
@@ -484,7 +630,7 @@ export default function Home() {
             <Button
               onClick={() => router.push("/announcement")}
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-102"
             >
               View All News
               <ExternalLink className="ml-2 h-5 w-5" />
@@ -493,7 +639,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
+     {/* Stats Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -512,7 +658,7 @@ export default function Home() {
               { number: "7+", label: "Years Running", icon: Calendar, color: "bg-blue-600" },
               { number: "500+", label: "Participants", icon: Users, color: "bg-red-600" },
               { number: "R45K", label: "Total Prizes", icon: Trophy, color: "bg-yellow-600" },
-              { number: "15+", label: "Partner Companies", icon: Zap, color: "bg-blue-600" },
+              { number: "15+", label: "Partner Companies", icon: Network, color: "bg-blue-600" },
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -520,7 +666,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 className="text-center group"
               >
                 <div
@@ -538,7 +684,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+     {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
@@ -584,10 +730,10 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10 }}
+                whileHover={{ y: -5 }}
                 className="group"
               >
-                <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full">
+                <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 h-full">
                   <div className="text-5xl mb-6">{feature.icon}</div>
                   <h3 className="text-2xl font-space-grotesk font-bold mb-4 text-gray-800">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{feature.description}</p>
@@ -681,7 +827,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+     {/* CTA Section */}
       <section className="py-20 bg-blue-600 relative overflow-hidden">
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
@@ -700,7 +846,7 @@ export default function Home() {
               <Button
                 onClick={handleRegisterClick}
                 size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-102"
               >
                 Register Now
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -718,42 +864,63 @@ export default function Home() {
       </section>
 
       {/* Registration Modal */}
-      {showRegisterModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowRegisterModal(false)}
-        >
+      <AnimatePresence>
+        {showRegisterModal && (
           <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowRegisterModal(false)}
           >
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Choose Your Hackathon</h3>
-            <div className="space-y-4">
-              {hackathons.map((hackathon, index) => (
-                <a
-                  key={index}
-                  href={hackathon.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full p-4 text-left bg-gray-50 hover:bg-blue-50 rounded-xl transition-colors duration-300 border border-gray-200 hover:border-blue-300"
-                >
-                  <div className="font-semibold text-gray-800">{hackathon.name}</div>
-                </a>
-              ))}
-            </div>
-            <Button onClick={() => setShowRegisterModal(false)} variant="outline" className="w-full mt-6">
-              Cancel
-            </Button>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white/95 backdrop-blur-md rounded-2xl p-8 max-w-md w-full shadow-2xl border border-white/20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.h3
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-2xl font-bold text-gray-800 mb-6 text-center"
+              >
+                Choose Your Hackathon
+              </motion.h3>
+              <div className="space-y-4">
+                {hackathons.map((hackathon, index) => (
+                  <motion.a
+                    key={index}
+                    href={hackathon.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full p-4 text-left bg-gray-50/80 hover:bg-blue-50/80 rounded-xl transition-all duration-300 border border-gray-200/50 hover:border-blue-300/50 backdrop-blur-sm"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    whileHover={{ scale: 1.01, x: 2 }}
+                  >
+                    <div className="font-semibold text-gray-800">{hackathon.name}</div>
+                  </motion.a>
+                ))}
+              </div>
+              <motion.button
+                onClick={() => setShowRegisterModal(false)}
+                className="w-full mt-6 px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors duration-300"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                Cancel
+              </motion.button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </main>
   )
 }
